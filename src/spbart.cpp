@@ -54,7 +54,21 @@ double pos_val(double x, double x_i){
         }
 }
 
-// Create a function to generate matrix D
+// Create a function to generate matrix D (for penalisation)
+arma::mat D(modelParam data){
+
+        // Creating the matrix elements
+        arma::mat D_m((data.p-2),data.p,arma::fill::zeros);
+
+        for(int i=0;i<(data.p-2);i++){
+                D_m(i,i) = 1;
+                D_m(i,i+1) = -2;
+                D_m(i, i+2) = 1;
+        }
+
+        return D_m;
+}
+
 
 // Function to generate B
 //[[Rcpp::export]]
@@ -1056,6 +1070,15 @@ void Node::nodeLogLike(modelParam& data, arma::vec &curr_res){
 
 }
 
+//[[Rcpp::export]]
+arma::vec matrix_tests(arma::mat matrix, arma::vec vector){
+        arma::rowvec col_sum = arma::sum(matrix,0);
+        arma::mat P_aux = col_sum.t()*col_sum;
+        // cout << "Matrix dimensions" << col_sum.
+        arma::vec vec_mult = col_sum*vector;
+        return vec_mult;
+}
+
 // Calculating the Loglilelihood of a node
 void Node::splineNodeLogLike(modelParam& data, arma::vec &curr_res){
 
@@ -1098,22 +1121,17 @@ void Node::splineNodeLogLike(modelParam& data, arma::vec &curr_res){
         // Calculating B
         B = leaf_x;
         B_test = leaf_x_test;
-        // cout << "Size of B test: it has rows: " << B_test.n_rows << " and columns: "  << B_test.n_cols << endl;
-         arma::mat B_t = B.t();
+        arma::mat B_t = B.t();
+        double s_tau_beta_0 = (n_leaf + data.tau_b_intercept/data.tau);
+        b_t_ones = arma::sum(B,0); // Col-sums from B - gonna use this again to sample beta_0 (remember is a row vector)
 
         // Redifining the matrix quantities
         arma::mat btb = B_t*B;
+        Gamma_inv  = inv(btb+(data.tau_b/data.tau)*data.P-(1/s_tau_beta_0)*(b_t_ones.t()*b_t_ones));
         btr = B_t*leaf_res;
-        // cout << "Size of B test: it has rows: " << btb.n_rows << " and columns: "  << btb.n_cols << endl;
-
         rtr = dot(leaf_res,leaf_res);
-        arma::mat precision_diag = arma::eye<arma::mat>(B.n_cols,B.n_cols)*(data.tau_b/data.tau);
-        // precision_diag(0,0) = data.tau_b_intercept/data.tau;
-        precision_diag(0,0) = (data.tau_b_intercept*data.tau_b)/data.tau;
 
-        inv_btb_p = inv(btb+precision_diag);
-
-        arma::mat aux_loglikelihood3 = (btr.t()*(inv_btb_p*btr));
+        arma::mat aux_loglikelihood3 = (btr.t()*(Gamma_inv*btr));
 
         // If is smaller then the node size still need to update theq quantities;
         // if(n_leaf < 15){
@@ -1121,7 +1139,7 @@ void Node::splineNodeLogLike(modelParam& data, arma::vec &curr_res){
         //         return;
         // }
 
-        log_likelihood = - 0.5*B.n_cols*log(data.tau) - 0.5*(B.n_cols-1)*log(data.tau_b) -  0.5*log(data.tau_b_intercept)+ 0.5*log(det(inv_btb_p))- 0.5*data.tau*rtr+0.5*data.tau*aux_loglikelihood3(0,0);
+        log_likelihood = -0.5*(data.p+1)*log(data.tau) + 0.5*data.p*log(data.tau_b) +  0.5*log(data.tau_b_intercept) - 0.5*log(s_tau_beta_0) + 0.5*log(det(Gamma_inv))- 0.5*data.tau*rtr+0.5*data.tau*aux_loglikelihood3(0,0);
 
         return;
 
@@ -1347,6 +1365,10 @@ Rcpp::List sbart(arma::mat x_train,
                         n_burn,
                         p_sample,
                         p_sample_levels);
+
+        // Creating the P matrix
+        arma::mat D_aux = D(data);
+        data.P = D_aux.t()*D_aux;
 
         // Getting the n_post
         int n_post = n_mcmc - n_burn;

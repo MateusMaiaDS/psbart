@@ -25,6 +25,7 @@ struct modelParam {
         double d_tau;
         arma::vec p_sample;
         arma::vec p_sample_levels;
+        arma::mat P;
 
         // MCMC spec.
         int n_mcmc;
@@ -99,7 +100,9 @@ struct Node {
      arma::mat B;
      arma::mat B_test;
      arma::mat inv_btb_p;
+     arma::mat Gamma_inv;
      arma::vec btr;
+     arma::rowvec b_t_ones;
 
      // Displaying and check nodes
      void displayNode();
