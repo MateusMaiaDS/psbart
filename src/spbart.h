@@ -23,6 +23,10 @@ struct modelParam {
         double tau;
         double a_tau;
         double d_tau;
+        double nu;
+        double delta;
+        double a_delta;
+        double d_delta;
         arma::vec p_sample;
         arma::vec p_sample_levels;
         arma::mat P;
@@ -46,6 +50,10 @@ struct modelParam {
                    double tau_,
                    double a_tau_,
                    double d_tau_,
+                   double nu_,
+                   double delta_,
+                   double a_delta_,
+                   double d_delta_,
                    double n_mcmc_,
                    double n_burn_,
                    arma::vec p_sample_,
@@ -95,14 +103,14 @@ struct Node {
      int n_leaf = 0;
      int n_leaf_test = 0;
      double rtr = 0.0;
-
+     double s_tau_beta_0 = 0.0;
+     double beta_zero = 0.0;
      // Storing  splines quantities
      arma::mat B;
      arma::mat B_test;
-     arma::mat inv_btb_p;
      arma::mat Gamma_inv;
      arma::vec btr;
-     arma::rowvec b_t_ones;
+     arma::mat b_t_ones;
 
      // Displaying and check nodes
      void displayNode();
