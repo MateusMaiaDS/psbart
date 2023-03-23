@@ -88,15 +88,17 @@ rbart <- function(x_train,
      # Scaling "y"
      if(scale_bool){
         y_scale <- normalize_bart(y = y,a = min_y,b = max_y)
+        tau_b_0 <- tau_b <- tau_mu <- (4*n_tree*(kappa^2))
+
      } else {
         y_scale <- y
+        tau_b_0 <- tau_b <- tau_mu <- (4*n_tree*(kappa^2))/((max_y-min_y)^2)
      }
 
 
      # Calculating \tau_{mu}
      tau_b_0 <- tau_b <- tau_mu <- (4*n_tree*(kappa^2))
      # tau_b <- n_tree
-     tau_b <- 200
 
      # Getting the naive sigma value
      nsigma <- naive_sigma(x = x_train_scale,y = y_scale)

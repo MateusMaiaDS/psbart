@@ -5,7 +5,7 @@ Rcpp::sourceCpp("src/spbart.cpp")
 source("R/other_functions.R")
 source("R/wrap_bart.R")
 source("R/bayesian_simulation.R")
-n_ <- 500
+n_ <- 100
 set.seed(42)
 # Simulation 1
 x <- matrix(seq(-pi,pi,length.out = n_))
@@ -15,8 +15,8 @@ colnames(x_new) <- "x"
 # x <- as.data.frame(x)
 # x_test <- as.data.frame(x_new)
 y <- sin(3*x) + rnorm(n = n_,sd = 0.1)
-# y[x<0] <- y[x<0] + 2
-# y[x>0] <- y[x>0] - 2
+y[x<0] <- y[x<0] + 2
+y[x>0] <- y[x>0] - 2
 # add_class <- rnorm(n = n_)
 # add_class <- factor(ifelse(add_class>0,"A","B"))
 
@@ -65,8 +65,8 @@ x_test <- as.data.frame(x_new)
 
 # Testing the GP-BART
 bart_test <- rbart(x_train = x,y = unlist(c(y)),x_test = x_test,
-                   n_tree = 1,n_mcmc = 2000,
-                   alpha = 0.95,beta = 2,nIknots = 50,delta = 1,nu = 2,
+                   n_tree = 1,n_mcmc = 2500,
+                   alpha = 0.95,beta = 2,nIknots = 100,delta = 0.0001,nu = 2,
                    n_burn = 500,scale_bool = TRUE)
 
 # Convergence plots
@@ -121,7 +121,7 @@ ggplot()+
      # geom_line(data = data.frame(x = x_new, y = unlist(pred_spline) ), mapping = aes(x = x, y = y), col ="darkgreen")+
      geom_line(data = all_tree_posterior_mean,
                mapping = aes(x = x, y = value, col = name), alpha = 0.5,show.legend = FALSE)+
-     ylim(y = range(y)*2)+
+     # ylim(y = range(y)*2)+
      theme_bw()
 
 # plot(bart_test$tau_post, type = "l")

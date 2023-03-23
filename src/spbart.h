@@ -109,6 +109,7 @@ struct Node {
      arma::mat B;
      arma::mat B_test;
      arma::mat Gamma_inv;
+     arma::mat btb;
      arma::vec btr;
      arma::mat b_t_ones;
 
