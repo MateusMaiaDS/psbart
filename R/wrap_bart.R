@@ -8,6 +8,7 @@ rbart <- function(x_train,
                   n_burn = 500,
                   alpha = 0.95,
                   beta = 2,
+                  dif_order = 2,
                   # df_splines = 10,
                   nIknots = 1,
                   df = 3,
@@ -75,6 +76,17 @@ rbart <- function(x_train,
                                       Boundary.knots = c(absolut_min,absolut_max)))
      B_test <- as.matrix(predict(B_train,newx = x_test_scale[,col_names[!(col_names %in% dummy_x$facVars)], drop = FALSE]))
 
+     # === Directly getting the Pnealised version over the basis function
+     #see (Eilers, 2010) and look for reference 26 in the text
+     #=====
+     if(dif_order!=0){
+             D <- D_gen(p = ncol(B_train),n_dif = dif_order)
+
+             # IN CASE WE WANT TO USE THE DIFFERENCE PENALISATION DIRECTLY OVER THE
+             #BASIS FUNCTION
+             B_train <- B_train%*%crossprod(D,solve(tcrossprod(D)))
+             B_test <- B_test%*%crossprod(D,solve(tcrossprod(D)))
+     }
      # Adding the intercept
      # B_train <- cbind(1,B_train)
      # B_test <- cbind(1,B_test)
@@ -89,6 +101,7 @@ rbart <- function(x_train,
      if(scale_bool){
         y_scale <- normalize_bart(y = y,a = min_y,b = max_y)
         tau_b_0 <- tau_b <- tau_mu <- (4*n_tree*(kappa^2))
+        # tau_b_0 <- tau_b <- tau_mu <- 100
 
      } else {
         y_scale <- y
@@ -114,6 +127,7 @@ rbart <- function(x_train,
 
      # Call the bart function
      tau_init <- nsigma^(-2)
+     tau_init <- 1
      mu_init <- mean(y_scale)
 
      # Creating the vector that stores all trees

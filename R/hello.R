@@ -22,11 +22,17 @@ y[x>0] <- y[x>0] - 2
 
 # # Simulation 2
 # x <- sort(runif(n_, 0, 1)) # Create some covariate values
-# # B = bbase(x)
+# B = bbase(x)
 # # B <- bs_bbase(x, nseg = 30)
 # nIknots <- 10
 # knots <- quantile(x,seq(0,1,length.out = nIknots+2))[-c(1,nIknots+2)]
 # B <- splines::ns(x = x,intercept = TRUE,knots = knots)
+# n_diffs <- 1
+# D <- diff(diag(ncol(B)), diff = n_diffs )
+# D <- diag(ncol(B))
+# P <- crossprod(D)
+# solve(P+diag(nrow(P))*.Machine$double.eps*100)
+# B%*%solve(P,t(B))
 # sigma_b <- 10 # Parameters as above
 # sigma <- 0.2
 # tau <- sigma^(-2)
@@ -48,14 +54,14 @@ y[x>0] <- y[x>0] - 2
 # colnames(x_new) <- c("x.0","x.1")
 
 # Testing over the motorbike data
-# library(boot)
-# data("motor")
-# x <- motor$times %>% as.matrix
-# y <- motor$accel %>% as.matrix()
-# x_new <- seq(min(x),max(x),length.out = 1000) %>% as.matrix()
-# colnames(x) <- "x"
-# colnames(x_new) <- "x"
-# x_new <- x
+library(boot)
+data("motor")
+x <- motor$times %>% as.matrix
+y <- motor$accel %>% as.matrix()
+x_new <- seq(min(x),max(x),length.out = 1000) %>% as.matrix()
+colnames(x) <- "x"
+colnames(x_new) <- "x"
+x_new <- x
 
 
 
@@ -65,8 +71,8 @@ x_test <- as.data.frame(x_new)
 
 # Testing the GP-BART
 bart_test <- rbart(x_train = x,y = unlist(c(y)),x_test = x_test,
-                   n_tree = 1,n_mcmc = 2500,
-                   alpha = 0.95,beta = 2,nIknots = 100,delta = 0.0001,nu = 2,
+                   n_tree = 10,n_mcmc = 2500,alpha = 0.95,dif_order = 5,
+                   beta = 2,nIknots = 10,delta = 1,nu = 2,
                    n_burn = 500,scale_bool = TRUE)
 
 # Convergence plots
@@ -133,21 +139,8 @@ ggplot()+
 # plot(bart_test$tau_b_post[-length(bart_test$tau_b_post)], type = "l")
 
 
-
-# b_no_intercept <- bs(x = x)
-# b_with_intercept <- bs(x = x,intercept = TRUE)
-# Getting the values of B
-# B <- B_train
-# B_new <- B_test
-# colnames(B) <- paste0("B.",1:ncol(B))
-# plot_basis <- B %>% cbind(x) %>% as.data.frame() %>% pivot_longer(starts_with("B"))
-#
-# colnames(B_new) <- paste0("B.",1:ncol(B_new))
-# plot_basis_new <- B_new %>% cbind(x_new) %>% as.data.frame() %>% pivot_longer(starts_with("B"))
-#
-# ggplot(plot_basis)+
-#         geom_line(mapping = aes(x = x, y = value, col = name))+
-#         theme_bw()
-
-par(mfrow=c(1,1))
+# Traceplots
+# par(mfrow=c(1,2))
+# plot(bart_test$tau_b_post,type = "l", main = expression(tau[b]))
+# plot(bart_test$tau_post,type = "l", main = expression(tau))
 

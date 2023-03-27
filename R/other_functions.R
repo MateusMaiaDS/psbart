@@ -1,3 +1,8 @@
+# Creating the D (difference matrix)
+D_gen <- function(p, n_dif){
+        return(diff(diag(p),diff = n_dif))
+}
+
 # Normalize BART function (Same way ONLY THE COVARIATE NOW)
 normalize_covariates_bart <- function(y, a = NULL, b = NULL) {
 
@@ -184,4 +189,5 @@ nll <- function(dat, x, par,B, tau_b_0_) {
         #          error=function(e) -Inf)
         return(-mvnfast::dmvn(t(y), rep(0, n), diag(tau^-1, n) + tcrossprod(B_new) , log = TRUE))
 }
+
 

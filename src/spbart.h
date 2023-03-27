@@ -30,6 +30,7 @@ struct modelParam {
         arma::vec p_sample;
         arma::vec p_sample_levels;
         arma::mat P;
+        arma::mat P_inv;
 
         // MCMC spec.
         int n_mcmc;
@@ -102,16 +103,14 @@ struct Node {
      double log_likelihood = 0;
      int n_leaf = 0;
      int n_leaf_test = 0;
-     double rtr = 0.0;
      double s_tau_beta_0 = 0.0;
      double beta_zero = 0.0;
      // Storing  splines quantities
      arma::mat B;
+     arma::mat B_t;
      arma::mat B_test;
-     arma::mat Gamma_inv;
-     arma::mat btb;
-     arma::vec btr;
      arma::mat b_t_ones;
+     arma::vec leaf_res;
 
      // Displaying and check nodes
      void displayNode();
