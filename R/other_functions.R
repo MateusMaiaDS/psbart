@@ -178,6 +178,7 @@ d_tau_b_rate <- function(df_tau_b,
         (pgamma(q = naive_tau_b,shape = df_tau_b/2,rate = d_tau_b,lower.tail = FALSE)-prob_tau_b)^2
 }
 
+
 # Getting the naive value for \tau_b
 nll <- function(dat, x, par,B, tau_b_0_) {
         tau <- par[1]

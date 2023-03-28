@@ -1357,7 +1357,8 @@ void updateTau(arma::vec &y_hat,
 
 // Updating tau b parameter
 void updateTauB(Forest all_trees,
-                modelParam &data){
+                modelParam &data,
+                double a_tau_b_, double d_tau_b_){
 
 
         double beta_count_total = 0.0;
@@ -1387,6 +1388,7 @@ void updateTauB(Forest all_trees,
         }
 
         data.tau_b = R::rgamma((0.5*beta_count_total + 0.5*data.nu),1/(0.5*beta_sq_sum_total+0.5*data.delta*data.nu));
+        // data.tau_b = R::rgamma((0.5*beta_count_total + a_tau_b_),1/(0.5*beta_sq_sum_total+d_tau_b_));
 
 
         return;
@@ -1454,6 +1456,7 @@ Rcpp::List sbart(arma::mat x_train,
           double a_tau, double d_tau,
           double nu, double delta,
           double a_delta, double d_delta,
+          double a_tau_b, double d_tau_b,
           arma::vec p_sample, arma::vec p_sample_levels){
 
         // Posterior counter
@@ -1589,7 +1592,7 @@ Rcpp::List sbart(arma::mat x_train,
 
                 // Updating the Tau
                 // std::cout << "Error TauB: " << data.tau_b << endl;
-                updateTauB(all_forest,data);
+                updateTauB(all_forest,data,a_tau_b,d_tau_b);
                 // std::cout << "Error Delta: " << data.delta << endl;
                 updateDelta(data);
                 // std::cout << "Error Tau: " << data.tau<< endl;

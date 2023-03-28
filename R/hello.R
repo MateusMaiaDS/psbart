@@ -54,14 +54,14 @@ y[x>0] <- y[x>0] - 2
 # colnames(x_new) <- c("x.0","x.1")
 
 # Testing over the motorbike data
-library(boot)
-data("motor")
-x <- motor$times %>% as.matrix
-y <- motor$accel %>% as.matrix()
-x_new <- seq(min(x),max(x),length.out = 1000) %>% as.matrix()
-colnames(x) <- "x"
-colnames(x_new) <- "x"
-x_new <- x
+# library(boot)
+# data("motor")
+# x <- motor$times %>% as.matrix
+# y <- motor$accel %>% as.matrix()
+# x_new <- seq(min(x),max(x),length.out = 1000) %>% as.matrix()
+# colnames(x) <- "x"
+# colnames(x_new) <- "x"
+# x_new <- x
 
 
 
@@ -71,8 +71,8 @@ x_test <- as.data.frame(x_new)
 
 # Testing the GP-BART
 bart_test <- rbart(x_train = x,y = unlist(c(y)),x_test = x_test,
-                   n_tree = 10,n_mcmc = 2500,alpha = 0.95,dif_order = 5,
-                   beta = 2,nIknots = 10,delta = 1,nu = 2,
+                   n_tree = 10,n_mcmc = 2500,alpha = 0.95,dif_order = 2,
+                   beta = 2,nIknots = 20,delta = 1,
                    n_burn = 500,scale_bool = TRUE)
 
 # Convergence plots
